@@ -29,7 +29,13 @@ if (!defined('TW_AUTO_MORE_TAG')) {
 		}
 
 		public static function addTag($data, $arr = array()) {
-			global $post;
+			global $post, $pages, $page;
+
+			if( $page > count( $pages ) )
+				$page = count( $pages );
+
+			$data = $pages[ $page - 1 ];
+
 			$options = get_option('tw_auto_more_tag');
 
 			if ($post->post_type != 'post' && $options['set_pages'] != true) {
@@ -51,18 +57,22 @@ if (!defined('TW_AUTO_MORE_TAG')) {
 
 			switch ($options['units']) {
 				case 1:
-					return self::$_instance->byCharacter($data, $length, $breakOn);
+					$data = self::$_instance->byCharacter($data, $length, $breakOn);
 					break;
 
 				case 2:
 				default:
-					return self::$_instance->byWord($data, $length, $breakOn);
+					$data = self::$_instance->byWord($data, $length, $breakOn);
 					break;
 
 				case 3:
-					return self::$_instance->byPercent($data, $length, $breakOn);
+					$data = self::$_instance->byPercent($data, $length, $breakOn);
 					break;
 			}
+
+			$pages[ $page - 1 ] = $data;
+			return get_the_content();
+
 		}
 
 		public function manual($data) {
@@ -233,7 +243,7 @@ if (!defined('TW_AUTO_MORE_TAG')) {
 		}
 
 		private function updateAll() {
-
+			return;
 			$posts = get_posts(array(
 				'numberposts' => '-1',
 				'post_status' => 'publish',
@@ -261,7 +271,7 @@ if (!defined('TW_AUTO_MORE_TAG')) {
 
 	add_action('admin_init', array($tw_auto_more_tag, 'initOptionsPage'));
 	add_action('admin_menu', array($tw_auto_more_tag, 'addPage'));
-	add_filter('content_save_pre', 'tw_auto_more_tag::addTag', '1', 2);
+	add_filter('the_content', 'tw_auto_more_tag::addTag', '-1', 2);
 	add_shortcode('amt_override', array($tw_auto_more_tag, 'manualOverride'));
 
 	define('TW_AUTO_MORE_TAG', true);
