@@ -23,36 +23,55 @@ class tw_auto_more_tag {
 	}
 
 	public function addTag() {
-		global $post, $pages, $page;
-
-		if( $page > count( $pages ) )
-			$page = count( $pages );
-
-		$data = $pages[ $page - 1 ];
 
 		$options = get_option('tw_auto_more_tag');
 
-		if( mb_strlen( strip_tags( $data ) ) <= 0 )
-			return $data;
-
-		$data = str_replace('<!--more-->', '', $data);
+		$data = &$this->getPage();
+		$data = str_replace('<!--more-->', '', $data );
 		
-		$break = ( $options['break'] === 2 ) ? PHP_EOL : ' ';
+		$break = $this->getBreakPoint( $options['break'] );
 
 		if( mb_strpos( $data, '[amt_override]' ) !== false ){
 
-			$pages[ $page - 1 ] = str_replace('[amt_override]', '<!--more-->', $data);
+			$data = str_replace('[amt_override]', '<!--more-->', $data);
 			return get_the_content();
 
 		}
 
-		$pages[ $page - 1 ] = $this->insertTag( $data, $options['quantity'], $options['units'], $break );
+		$data = $this->insertTag( $data, $options['quantity'], $options['units'], $break );
 
 		return get_the_content();
 
 	}
 
+	private function &getPage() {
+		global $post, $pages, $page;
+
+		if( $page > count( $pages ) )
+			$page = count( $pages );
+
+		return $pages[ $page - 1 ];
+
+	}
+
+	private function getBreakPoint( $breakOn ) {
+
+		switch( $breakOn ){
+			case 2:
+				return PHP_EOL;
+				break;
+			case 1:
+			default:
+				return ' ';
+				break;
+		}
+
+	}
+
 	private function insertTag( $data, $length, $units, $break ) {
+
+		if( mb_strlen( strip_tags( $data ) ) <= 0 )
+			return $data;
 
 		switch( $units ) {
 
@@ -67,11 +86,11 @@ class tw_auto_more_tag {
 				break;
 
 		}
-
+		
 		$start = mb_substr( $data, 0, $location);
 		$end = mb_substr( $data, $location );
 
-		if( mb_strlen( trim( $start ) ) > 0 && mb_strlen( trim( $end ) ) > 0 )
+		if( !empty( $location ) && mb_strlen( trim( $start ) ) > 0 && mb_strlen( trim( $end ) ) > 0 )
 			$data = $start . '<!--more-->' . $end;
 
 		return $data;
