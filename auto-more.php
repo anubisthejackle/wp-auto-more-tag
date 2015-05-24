@@ -44,7 +44,7 @@ class tw_auto_more_tag {
 		}
 
 		$length = $options['quantity'];
-		$breakOn = $options['break'];
+		$break = ( $options['break'] === 2 ) ? PHP_EOL : ' ';
 
 		$moreTag = mb_strpos($data, '[amt_override]');
 
@@ -57,16 +57,16 @@ class tw_auto_more_tag {
 
 		switch ($options['units']) {
 			case 1:
-				$data = $this->byCharacter($data, $length, $breakOn);
+				$data = $this->byCharacter($data, $length, $break);
 				break;
 
 			case 2:
 			default:
-				$data = $this->byWord($data, $length, $breakOn);
+				$data = $this->byWord($data, $length, $break);
 				break;
 
 			case 3:
-				$data = $this->byPercent($data, $length, $breakOn);
+				$data = $this->byPercent($data, $length, $break);
 				break;
 		}
 
@@ -84,9 +84,8 @@ class tw_auto_more_tag {
 
 	}
 
-	private function byWord($data, $length, $breakOn) {
+	private function byWord($data, $length, $break) {
 
-		$break = ($breakOn == 2) ? PHP_EOL : ' ';
 		$data = str_replace('<!--more-->', '', $data);
 		$stripped_data = strip_tags($data);
 
@@ -123,9 +122,8 @@ class tw_auto_more_tag {
 		return $data;
 	}
 
-	private function byCharacter($data, $length, $breakOn) {
+	private function byCharacter($data, $length, $break) {
 
-		$break = ($breakOn == 2) ? PHP_EOL : ' ';
 		$data = str_replace('<!--more-->', '', $data);
 		$stripped_data = strip_tags($data);
 		$fullLength = mb_strlen($data);
@@ -153,9 +151,8 @@ class tw_auto_more_tag {
 		return $data;
 	}
 
-	private function byPercent($data, $length, $breakOn) {
+	private function byPercent($data, $length, $break) {
 
-		$break = ($breakOn === 2) ? PHP_EOL : ' ';
 		$data = str_replace('<!--more-->', '', $data);
 
 		/* Strip Tags, get length */
