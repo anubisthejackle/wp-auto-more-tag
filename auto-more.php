@@ -47,136 +47,69 @@ class tw_auto_more_tag {
 
 		}
 
-		switch ($options['units']) {
-
-			case 1:
-				$data = $this->byCharacter($data, $options['quantity'], $break);
-				break;
-
-			case 2:
-			default:
-				$data = $this->byWord($data, $options['quantity'], $break);
-				break;
+		$length = $options['quantity'];
+		error_log( $length );
+		error_log( $options['units'] );
+		switch( $options['units'] ) {
 
 			case 3:
-				$data = $this->byPercent($data, $options['quantity'], $break);
+				$length = ceil( mb_strlen( strip_tags( $data ) ) * ( $length / 100 ) );
+			case 1:
+				$insert_spot = $this->getInsertLocation($data, $length, $break, 'characters');
 				break;
-
+			case 2:
+			default:
+				$insert_spot = $this->getInsertLocation($data, $length, $break, 'words');
+				break;
 			case -1:
+				$insert_spot = false;
 				break;
 
 		}
+
+		if( $insert_spot !== false )
+			$data = $this->insertTag( $data, $insert_spot );
 
 		$pages[ $page - 1 ] = $data;
 		return get_the_content();
 
 	}
 
-	private function insertTag( $data, $length, $break ) {
+	private function insertTag( $data, $location ) {
 
+		$start = mb_substr( $data, 0, $location);
+		$end = mb_substr( $data, $location );
+
+		if( mb_strlen( trim( $start ) ) > 0 && mb_strlen( trim( $end ) ) > 0 )
+			$data = $start . '<!--more-->' . $end;
+
+		return $data;
+
+	}
+
+	private function getInsertLocation( $data, $insertLocation, $break, $decider = 'words' ) {
 		
+		$words = 0;
+		$characters = 0;
+	
+		$stripped_data = strip_tags( $data );
 
-	}
+		for( $i = 0; $i < mb_strlen( $data ); $i++ ) {
 
-	private function byWord($data, $length, $break) {
-
-		$stripped_data = strip_tags($data);
-
-		$fullLength = mb_strlen($data);
-
-		$strippedLocation = 0;
-		$wordCount = 0;
-		$insertSpot = $fullLength;
-		for ($i = 0; $i < $fullLength; $i++) {
-			if (mb_substr($stripped_data, $strippedLocation, 1) != mb_substr($data, $i, 1)) {
-				continue;
-			}
-
-			if ($wordCount >= $length) {
-				if (mb_substr($stripped_data, $strippedLocation, 1) == $break) {
-					$insertSpot = $i;
-					break;
-				}
-			}
-
-			if (mb_substr($stripped_data, $strippedLocation, 1) == ' ') {
-				$wordCount++;
-			}
-
-			$strippedLocation++;
-		}
-
-		$start = mb_substr($data, 0, $insertSpot);
-		$end = mb_substr($data, $insertSpot);
-
-		if (mb_strlen(trim($start)) > 0 && mb_strlen(trim($end)) > 0)
-			$data = $start . '<!--more-->' . $end;
-
-		return $data;
-	}
-
-	private function byCharacter($data, $length, $break) {
-
-		$stripped_data = strip_tags($data);
-		$fullLength = mb_strlen($data);
-		$strippedLocation = 0;
-		$insertSpot = $fullLength;
-		for ($i = 0; $i < $fullLength; $i++) {
-			if (mb_substr($stripped_data, $strippedLocation, 1) != mb_substr($data, $i, 1)) {
-				continue;
-			}
-			if ($strippedLocation >= $length) {
-				if (mb_substr($stripped_data, $strippedLocation, 1) == $break) {
-					$insertSpot = $i;
-					break;
-				}
-			}
-			$strippedLocation++;
-		}
-
-		$start = mb_substr($data, 0, $insertSpot);
-		$end = mb_substr($data, $insertSpot);
-
-		if (mb_strlen(trim($start)) > 0 && mb_strlen(trim($end)) > 0)
-			$data = $start . '<!--more-->' . $end;
-
-		return $data;
-	}
-
-	private function byPercent($data, $length, $break) {
-
-		/* Strip Tags, get length */
-		$stripped_data = strip_tags($data);
-		$lengthOfPost  = mb_strlen($stripped_data);
-		$fullLength    = mb_strlen($data);
-
-		/* Find location to insert */
-		$insert_location = $lengthOfPost * ($length / 100);
-
-		/* iterate through post, look for differences between stripped and unstripped. If found, continue */
-		$strippedLocation = 0;
-
-		$insertSpot = $fullLength;
-		for ($i = 0; $i < $fullLength; $i++) {
-			if ( mb_substr($stripped_data, $strippedLocation, 1) != mb_substr($data, $i, 1) )
+			if ( mb_substr( $stripped_data, $characters, 1 ) != mb_substr( $data, $i, 1 ) )
 				continue;
 
-			if ( $strippedLocation >= $insert_location ) {
-				if ( mb_substr($stripped_data, $strippedLocation, 1) == $break ) {
-					$insertSpot = $i;
-					break;
-				}
-			}
-			$strippedLocation++;
+			if (mb_substr($stripped_data, $characters, 1) == ' ')	
+				$words++;
+			
+			$characters++;
+
+			if( ${$decider} < ( $insertLocation + 1 ) || ( mb_substr( $stripped_data, ( $characters - 1 ), 1 ) != $break ) )
+				continue;
+			
+			return $i;
+
 		}
-
-		$start = mb_substr($data, 0, $insertSpot);
-		$end = mb_substr($data, $insertSpot);
-
-		if (mb_strlen(trim($start)) > 0 && mb_strlen(trim($end)) > 0)
-			$data = $start . '<!--more-->' . $end;
-
-		return $data;
 
 	}
 
@@ -235,5 +168,4 @@ class tw_auto_more_tag {
 
 }
 
-$tw_auto_more_tag = new tw_auto_more_tag();
-
+new tw_auto_more_tag();
