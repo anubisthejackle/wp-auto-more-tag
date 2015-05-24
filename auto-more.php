@@ -48,7 +48,7 @@ class tw_auto_more_tag {
 
 		$moreTag = mb_strpos($data, '[amt_override]');
 
-		if ($moreTag !== false && $options['ignore_man_tag'] != true) {
+		if ( $moreTag !== false ) {
 			return $this->manual($data);
 		}
 

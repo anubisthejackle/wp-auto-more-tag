@@ -93,13 +93,6 @@ function hasWarnings($messages) {
 				</select>
 			</div>
 			<div>
-				<label for="tw_auto_more_tag[ignore_man_tag]">Ignore Manually Inserted Tags?</label>
-				<select id="tw_auto_more_tag[ignore_man_tag]" name="tw_auto_more_tag[ignore_man_tag]">
-					<option value="1" <?php echo (!isset($options['ignore_man_tag']) || ( (bool)$options['ignore_man_tag'] === true ) ) ? 'selected="SELECTED" ' : null;?>/>Yes
-					<option value="0" <?php echo (isset($options['ignore_man_tag']) && ( (bool)$options['ignore_man_tag'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
-				</select>
-			</div>
-			<div>
 				<label for="tw_auto_more_tag[set_pages]">Set More Tag On Pages?</label>
 				<select id="tw_auto_more_tag[set_pages]" name="tw_auto_more_tag[set_pages]">
 					<option value="0" <?php echo (!isset($options['set_pages']) || ( (bool)$options['set_pages'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
