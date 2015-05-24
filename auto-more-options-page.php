@@ -13,12 +13,7 @@ function hasWarnings($messages) {
 ?>
 <div class="wrap">
 	<h2>Auto More Tag by <a href="http://travisweston.com/">Travis Weston</a></h2>
-		<?php $options = get_option('tw_auto_more_tag'); 
-			if(isset($_GET['settings-updated']) && isset($options['auto_update']) && $options['auto_update'] == true){
-				$this->updateAll();
-			}
-		?>
-		<?php
+		<?php $options = get_option('tw_auto_more_tag');
 			if(hasErrors($options['messages']) || hasNotices($options['messages']) || hasWarnings($options['messages'])){
 		?>
 	<div id="auto_more_tags" class="error settings-error">
