@@ -2,11 +2,11 @@
 
 /*
   Plugin Name: Auto More Tag
-  Plugin URI: https://github.com/toubsen/wp-auto-more-tag
+  Plugin URI: https://github.com/anubisthejackle/wp-auto-more-tag
   Description: Automatically add a More tag to your posts upon publication. No longer are you required to spend your time figuring out the perfect position for the more tag, you can now set a rule and this plugin will--to the best of it's abilities--add a proper more tag at or at the nearest non-destructive location.
   Author: Travis Weston, Tobias Vogel
   Author URI: https://github.com/anubisthejackle
-  Version: 3.2.2
+  Version: 4.0.0
  */
 
 if (!defined('TW_AUTO_MORE_TAG')) {
