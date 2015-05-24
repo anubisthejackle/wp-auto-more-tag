@@ -88,22 +88,22 @@ function hasWarnings($messages) {
 			<div>
 				<label for="tw_auto_more_tag[auto_update]">Auto Update Posts On Settings Update?</label>
 				<select id="tw_auto_more_tag[auto_update]" name="tw_auto_more_tag[auto_update]">
-					<option value="1" <?php echo (isset($options['auto_update']) && $options['auto_update'] == true) ? 'selected="SELECTED" ' : null;?>/>Yes
-					<option value="0" <?php echo (!isset($options['auto_update']) || $options['auto_update'] == false) ? 'selected="SELECTED" ' : null;?>/>No
+					<option value="1" <?php echo (isset($options['auto_update']) && ( (bool)$options['auto_update'] === true ) ) ? 'selected="SELECTED" ' : null;?>/>Yes
+					<option value="0" <?php echo (!isset($options['auto_update']) || ( (bool)$options['auto_update'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
 				</select>
 			</div>
 			<div>
 				<label for="tw_auto_more_tag[ignore_man_tag]">Ignore Manually Inserted Tags?</label>
 				<select id="tw_auto_more_tag[ignore_man_tag]" name="tw_auto_more_tag[ignore_man_tag]">
-					<option value="1" <?php echo (!isset($options['ignore_man_tag']) || $options['ignore_man_tag'] == true) ? 'selected="SELECTED" ' : null;?>/>Yes
-					<option value="0" <?php echo (isset($options['ignore_man_tag']) && $options['ignore_man_tag'] == false) ? 'selected="SELECTED" ' : null;?>/>No
+					<option value="1" <?php echo (!isset($options['ignore_man_tag']) || ( (bool)$options['ignore_man_tag'] === true ) ) ? 'selected="SELECTED" ' : null;?>/>Yes
+					<option value="0" <?php echo (isset($options['ignore_man_tag']) && ( (bool)$options['ignore_man_tag'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
 				</select>
 			</div>
 			<div>
 				<label for="tw_auto_more_tag[set_pages]">Set More Tag On Pages?</label>
 				<select id="tw_auto_more_tag[set_pages]" name="tw_auto_more_tag[set_pages]">
-					<option value="0" <?php echo (!isset($options['set_pages']) || $options['set_pages'] == false) ? 'selected="SELECTED" ' : null;?>/>No
-					<option value="1" <?php echo (isset($options['set_pages']) && $options['set_pages'] == true) ? 'selected="SELECTED" ' : null;?>/>Yes
+					<option value="0" <?php echo (!isset($options['set_pages']) || ( (bool)$options['set_pages'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
+					<option value="1" <?php echo (isset($options['set_pages']) && ( (bool)$options['set_pages'] === true ) ) ? 'selected="SELECTED" ' : null;?>/>Yes
 				</select>
 			</div>
 			<p class="submit">
