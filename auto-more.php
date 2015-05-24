@@ -11,22 +11,22 @@
 
 class tw_auto_more_tag {
 
-	private static $_instance;
 	public $length;
 	public $options;
 	public $data;
 
 	public function __construct() {
-		global $wpdb;
-		$this->_db = &$wpdb;
-		self::$_instance = $this;
+
+		add_action(    'admin_init'  , array( $this, 'initOptionsPage' )         );
+		add_action(    'admin_menu'  , array( $this, 'addPage'         )         );
+
+		add_filter(    'the_content' , array( $this, 'addTag'          ), '-1', 2);
+
+		add_shortcode( 'amt_override', '__return_null'                           );
+
 	}
 
-	private static function doLog($message) {
-		file_put_contents('./debug.log', $message, FILE_APPEND);
-	}
-
-	public static function addTag($data, $arr = array()) {
+	public function addTag($data, $arr = array()) {
 		global $post, $pages, $page;
 
 		if( $page > count( $pages ) )
@@ -37,8 +37,10 @@ class tw_auto_more_tag {
 		$options = get_option('tw_auto_more_tag');
 
 		if ($post->post_type != 'post' && $options['set_pages'] != true) {
+
 			$data = str_replace('<!--more-->', '', $data);
 			return $data;
+
 		}
 
 		$length = $options['quantity'];
@@ -47,7 +49,7 @@ class tw_auto_more_tag {
 		$moreTag = mb_strpos($data, '[amt_override]');
 
 		if ($moreTag !== false && $options['ignore_man_tag'] != true) {
-			return self::$_instance->manual($data);
+			return $this->manual($data);
 		}
 
 		if (mb_strlen(strip_tags($data)) <= 0)
@@ -55,16 +57,16 @@ class tw_auto_more_tag {
 
 		switch ($options['units']) {
 			case 1:
-				$data = self::$_instance->byCharacter($data, $length, $breakOn);
+				$data = $this->byCharacter($data, $length, $breakOn);
 				break;
 
 			case 2:
 			default:
-				$data = self::$_instance->byWord($data, $length, $breakOn);
+				$data = $this->byWord($data, $length, $breakOn);
 				break;
 
 			case 3:
-				$data = self::$_instance->byPercent($data, $length, $breakOn);
+				$data = $this->byPercent($data, $length, $breakOn);
 				break;
 		}
 
@@ -82,7 +84,7 @@ class tw_auto_more_tag {
 
 	}
 
-	public function byWord($data, $length, $breakOn) {
+	private function byWord($data, $length, $breakOn) {
 
 		$break = ($breakOn == 2) ? PHP_EOL : ' ';
 		$data = str_replace('<!--more-->', '', $data);
@@ -121,7 +123,7 @@ class tw_auto_more_tag {
 		return $data;
 	}
 
-	public function byCharacter($data, $length, $breakOn) {
+	private function byCharacter($data, $length, $breakOn) {
 
 		$break = ($breakOn == 2) ? PHP_EOL : ' ';
 		$data = str_replace('<!--more-->', '', $data);
@@ -151,15 +153,15 @@ class tw_auto_more_tag {
 		return $data;
 	}
 
-	public function byPercent($data, $length, $breakOn) {
+	private function byPercent($data, $length, $breakOn) {
 
-		$debug = null;
 		$break = ($breakOn === 2) ? PHP_EOL : ' ';
 		$data = str_replace('<!--more-->', '', $data);
+
 		/* Strip Tags, get length */
 		$stripped_data = strip_tags($data);
-		$lengthOfPost = mb_strlen($stripped_data);
-		$fullLength = mb_strlen($data);
+		$lengthOfPost  = mb_strlen($stripped_data);
+		$fullLength    = mb_strlen($data);
 
 		/* Find location to insert */
 		$insert_location = $lengthOfPost * ($length / 100);
@@ -169,11 +171,11 @@ class tw_auto_more_tag {
 
 		$insertSpot = $fullLength;
 		for ($i = 0; $i < $fullLength; $i++) {
-			if (mb_substr($stripped_data, $strippedLocation, 1) != mb_substr($data, $i, 1)) {
+			if ( mb_substr($stripped_data, $strippedLocation, 1) != mb_substr($data, $i, 1) )
 				continue;
-			}
-			if ($strippedLocation >= $insert_location) {
-				if (mb_substr($stripped_data, $strippedLocation, 1) == $break) {
+
+			if ( $strippedLocation >= $insert_location ) {
+				if ( mb_substr($stripped_data, $strippedLocation, 1) == $break ) {
 					$insertSpot = $i;
 					break;
 				}
@@ -188,6 +190,7 @@ class tw_auto_more_tag {
 			$data = $start . '<!--more-->' . $end;
 
 		return $data;
+
 	}
 
 	public function initOptionsPage() {
@@ -206,46 +209,44 @@ class tw_auto_more_tag {
 			'warnings' => array()
 		);
 
-		$input['quantity'] = (isset($input['quantity']) && (int) $input['quantity'] > 0) ? ((int) $input['quantity']) : 0;
+		$input['quantity'] = ( isset( $input['quantity'] ) && (int)$input['quantity'] > 0 ) ? ( (int)$input['quantity'] ) : 0;
 
-		if ($input['quantity'] != $start['quantity']) {
+		if( $input['quantity'] != $start['quantity'] ) {
+
 			$input['messages']['notices'][] = 'Quantity cannot be less than 0, and has been set to 0.';
+
 		}
 
-		$input['ignore_man_tag'] = (isset($input['ignore_man_tag']) && ((bool) $input['ignore_man_tag'] == true)) ? true : false;
+		$input['ignore_man_tag'] = ( isset( $input['ignore_man_tag'] ) && ( (bool)$input['ignore_man_tag'] === true ) ) ? true : false;
 
-		$input['units'] = ((int) $input['units'] == 1) ? 1 : (((int) $input['units'] == 2) ? 2 : 3);
+		$input['units'] = ( (int)$input['units'] == 1 ) ? 1 : ( ( (int)$input['units'] == 2 ) ? 2 : 3 );
 
-		if ($input['units'] == 3 && $input['quantity'] > 100) {
+		if($input['units'] == 3 && $input['quantity'] > 100) {
+
 			$input['messages']['notices'][] = 'While using Percentage breaking, you cannot us a number larger than 100%. This field has been reset to 50%.';
 			$input['quantity'] = 50;
+
 		}
+
 		$input['break'] = (isset($input['break']) && (int) $input['break'] == 2) ? 2 : 1;
 
 		return $input;
+
 	}
 
 	public function buildOptionsPage() {
+
 		require_once('auto-more-options-page.php');
+
 	}
 
 	public function addPage() {
+
 		$this->option_page = add_options_page('Auto More Tag', 'Auto More Tag', 'manage_options', 'tw_auto_more_tag', array($this, 'buildOptionsPage'));
-	}
 
-	private function updateAll() {
-	}
-
-	public function manualOverride($atts, $content = null, $code = null) {
-		// We just want to make this tag disappear. Let's just make it go away now...
-		return null;
 	}
 
 }
 
 $tw_auto_more_tag = new tw_auto_more_tag();
 
-add_action('admin_init', array($tw_auto_more_tag, 'initOptionsPage'));
-add_action('admin_menu', array($tw_auto_more_tag, 'addPage'));
-add_filter('the_content', 'tw_auto_more_tag::addTag', '-1', 2);
-add_shortcode('amt_override', array($tw_auto_more_tag, 'manualOverride'));
