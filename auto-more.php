@@ -35,21 +35,19 @@ class tw_auto_more_tag {
 		if( ( $post->post_type != 'post' && $options['set_pages'] != true ) || ( mb_strlen( strip_tags( $data ) ) <= 0 ) )
 			return $data;
 
-
 		$data = str_replace('<!--more-->', '', $data);
 		
 		$break = ( $options['break'] === 2 ) ? PHP_EOL : ' ';
 
 		if( mb_strpos( $data, '[amt_override]' ) !== false ){
 
-			$data = str_replace('[amt_override]', '<!--more-->', $data);
-			$options['units'] = -1;
+			$pages[ $page - 1 ] = str_replace('[amt_override]', '<!--more-->', $data);
+			return get_the_content();
 
 		}
 
 		$length = $options['quantity'];
-		error_log( $length );
-		error_log( $options['units'] );
+
 		switch( $options['units'] ) {
 
 			case 3:
@@ -61,16 +59,12 @@ class tw_auto_more_tag {
 			default:
 				$insert_spot = $this->getInsertLocation($data, $length, $break, 'words');
 				break;
-			case -1:
-				$insert_spot = false;
-				break;
 
 		}
 
-		if( $insert_spot !== false )
-			$data = $this->insertTag( $data, $insert_spot );
+		
+		$pages[ $page - 1 ] = $this->insertTag( $data, $insert_spot );
 
-		$pages[ $page - 1 ] = $data;
 		return get_the_content();
 
 	}
