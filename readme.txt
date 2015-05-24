@@ -28,7 +28,7 @@ paragraphs off without cause.
 Head to the [Wordpress plugins forum](http://wordpress.org/support/plugin/auto-more-tag)
 
 = Where to send code issues / bugfixes? =
-Head to the [Github project's issue tracker](https://github.com/toubsen/wp-auto-more-tag/issues)
+Head to the [Github project's issue tracker](https://github.com/anubisthejackle/wp-auto-more-tag/issues)
 
 == Screenshots ==
 
