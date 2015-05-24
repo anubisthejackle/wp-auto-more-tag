@@ -22,7 +22,7 @@ class tw_auto_more_tag {
 
 	}
 
-	public function addTag($data, $arr = array()) {
+	public function addTag() {
 		global $post, $pages, $page;
 
 		if( $page > count( $pages ) )
