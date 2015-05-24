@@ -11,10 +11,6 @@
 
 class tw_auto_more_tag {
 
-	public $length;
-	public $options;
-	public $data;
-
 	public function __construct() {
 
 		add_action(    'admin_init'  , array( $this, 'initOptionsPage' )         );
@@ -36,38 +32,39 @@ class tw_auto_more_tag {
 
 		$options = get_option('tw_auto_more_tag');
 
-		if ($post->post_type != 'post' && $options['set_pages'] != true) {
-
-			$data = str_replace('<!--more-->', '', $data);
+		if( ( $post->post_type != 'post' && $options['set_pages'] != true ) || ( mb_strlen( strip_tags( $data ) ) <= 0 ) )
 			return $data;
 
-		}
 
-		$length = $options['quantity'];
+		$data = str_replace('<!--more-->', '', $data);
+		
 		$break = ( $options['break'] === 2 ) ? PHP_EOL : ' ';
 
-		$moreTag = mb_strpos($data, '[amt_override]');
+		if( mb_strpos( $data, '[amt_override]' ) !== false ){
 
-		if ( $moreTag !== false ) {
-			return $this->manual($data);
+			$data = str_replace('[amt_override]', '<!--more-->', $data);
+			$options['units'] = -1;
+
 		}
 
-		if (mb_strlen(strip_tags($data)) <= 0)
-			return $data;
-
 		switch ($options['units']) {
+
 			case 1:
-				$data = $this->byCharacter($data, $length, $break);
+				$data = $this->byCharacter($data, $options['quantity'], $break);
 				break;
 
 			case 2:
 			default:
-				$data = $this->byWord($data, $length, $break);
+				$data = $this->byWord($data, $options['quantity'], $break);
 				break;
 
 			case 3:
-				$data = $this->byPercent($data, $length, $break);
+				$data = $this->byPercent($data, $options['quantity'], $break);
 				break;
+
+			case -1:
+				break;
+
 		}
 
 		$pages[ $page - 1 ] = $data;
@@ -75,18 +72,14 @@ class tw_auto_more_tag {
 
 	}
 
-	public function manual($data) {
+	private function insertTag( $data, $length, $break ) {
 
-		$data = str_replace('<!--more-->', '', $data);
-		$data = str_replace('[amt_override]', '[amt_override]<!--more-->', $data);
-
-		return $data;
+		
 
 	}
 
 	private function byWord($data, $length, $break) {
 
-		$data = str_replace('<!--more-->', '', $data);
 		$stripped_data = strip_tags($data);
 
 		$fullLength = mb_strlen($data);
@@ -124,7 +117,6 @@ class tw_auto_more_tag {
 
 	private function byCharacter($data, $length, $break) {
 
-		$data = str_replace('<!--more-->', '', $data);
 		$stripped_data = strip_tags($data);
 		$fullLength = mb_strlen($data);
 		$strippedLocation = 0;
@@ -152,8 +144,6 @@ class tw_auto_more_tag {
 	}
 
 	private function byPercent($data, $length, $break) {
-
-		$data = str_replace('<!--more-->', '', $data);
 
 		/* Strip Tags, get length */
 		$stripped_data = strip_tags($data);
