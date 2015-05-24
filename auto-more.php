@@ -9,7 +9,7 @@
   Version: 4.1.0
  */
 
-class tw_auto_more_tag {
+class AutoMoreTag {
 
 	public function __construct() {
 
@@ -184,4 +184,4 @@ class tw_auto_more_tag {
 
 }
 
-new tw_auto_more_tag();
+new AutoMoreTag();
