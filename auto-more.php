@@ -86,7 +86,13 @@ class tw_auto_more_tag {
 				break;
 
 		}
-		
+	
+		return $this->splitAndInsert( $data, $location );	
+
+	}
+
+	private function splitAndInsert( $data, $location ) {
+
 		$start = mb_substr( $data, 0, $location);
 		$end = mb_substr( $data, $location );
 
