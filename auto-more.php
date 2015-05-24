@@ -46,30 +46,27 @@ class tw_auto_more_tag {
 
 		}
 
-		$length = $options['quantity'];
-
-		switch( $options['units'] ) {
-
-			case 3:
-				$length = ceil( mb_strlen( strip_tags( $data ) ) * ( $length / 100 ) );
-			case 1:
-				$insert_spot = $this->getInsertLocation($data, $length, $break, 'characters');
-				break;
-			case 2:
-			default:
-				$insert_spot = $this->getInsertLocation($data, $length, $break, 'words');
-				break;
-
-		}
-
-		
-		$pages[ $page - 1 ] = $this->insertTag( $data, $insert_spot );
+		$pages[ $page - 1 ] = $this->insertTag( $data, $options['quantity'], $options['units'], $break );
 
 		return get_the_content();
 
 	}
 
-	private function insertTag( $data, $location ) {
+	private function insertTag( $data, $length, $units, $break ) {
+
+		switch( $units ) {
+
+			case 3:
+				$length = ceil( mb_strlen( strip_tags( $data ) ) * ( $length / 100 ) );
+			case 1:
+				$location = $this->getInsertLocation($data, $length, $break, 'characters');
+				break;
+			case 2:
+			default:
+				$location = $this->getInsertLocation($data, $length, $break, 'words');
+				break;
+
+		}
 
 		$start = mb_substr( $data, 0, $location);
 		$end = mb_substr( $data, $location );
