@@ -92,13 +92,6 @@ function hasWarnings($messages) {
 					<option value="0" <?php echo (!isset($options['auto_update']) || ( (bool)$options['auto_update'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
 				</select>
 			</div>
-			<div>
-				<label for="tw_auto_more_tag[set_pages]">Set More Tag On Pages?</label>
-				<select id="tw_auto_more_tag[set_pages]" name="tw_auto_more_tag[set_pages]">
-					<option value="0" <?php echo (!isset($options['set_pages']) || ( (bool)$options['set_pages'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
-					<option value="1" <?php echo (isset($options['set_pages']) && ( (bool)$options['set_pages'] === true ) ) ? 'selected="SELECTED" ' : null;?>/>Yes
-				</select>
-			</div>
 			<p class="submit">
 				<input type="submit" class="button-primary" value="<?php _e('Update Auto More Tag Settings'); ?>" />
 			</p>

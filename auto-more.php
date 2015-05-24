@@ -32,7 +32,7 @@ class tw_auto_more_tag {
 
 		$options = get_option('tw_auto_more_tag');
 
-		if( ( $post->post_type != 'post' && $options['set_pages'] != true ) || ( mb_strlen( strip_tags( $data ) ) <= 0 ) )
+		if( mb_strlen( strip_tags( $data ) ) <= 0 )
 			return $data;
 
 		$data = str_replace('<!--more-->', '', $data);
