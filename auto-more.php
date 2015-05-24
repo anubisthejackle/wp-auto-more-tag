@@ -233,7 +233,7 @@ class tw_auto_more_tag {
 
 	public function buildOptionsPage() {
 
-		require_once('options.php');
+		require_once( dirname( __FILE__ ) . '/options.php');
 
 	}
 
