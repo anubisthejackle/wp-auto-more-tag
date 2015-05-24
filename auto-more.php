@@ -233,7 +233,7 @@ class tw_auto_more_tag {
 
 	public function buildOptionsPage() {
 
-		require_once('auto-more-options-page.php');
+		require_once('options.php');
 
 	}
 
