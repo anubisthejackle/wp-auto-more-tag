@@ -86,13 +86,6 @@ function hasWarnings($messages) {
 				</select>
 			</div>
 			<div>
-				<label for="tw_auto_more_tag[auto_update]">Auto Update Posts On Settings Update?</label>
-				<select id="tw_auto_more_tag[auto_update]" name="tw_auto_more_tag[auto_update]">
-					<option value="1" <?php echo (isset($options['auto_update']) && ( (bool)$options['auto_update'] === true ) ) ? 'selected="SELECTED" ' : null;?>/>Yes
-					<option value="0" <?php echo (!isset($options['auto_update']) || ( (bool)$options['auto_update'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
-				</select>
-			</div>
-			<div>
 				<label for="tw_auto_more_tag[custom_content]">Custom More Tag Content:</label>
 				<input id="tw_auto_more_tag[custom_content]" name="tw_auto_more_tag[custom_content]" value="<?php echo isset( $options['custom_content'] ) ? $options['custom_content'] : null; ?>" />
 			</div>
