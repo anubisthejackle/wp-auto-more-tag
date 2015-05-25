@@ -8,7 +8,7 @@
   Author URI: https://github.com/anubisthejackle
   Version: 4.1.0
  */
-
+require_once( dirname( __FILE__ ) . '/options.php' );
 class AutoMoreTag {
 
 	public function __construct() {

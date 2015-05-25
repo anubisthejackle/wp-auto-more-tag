@@ -33,8 +33,6 @@ class AutoMoreTag_Options {
 
 		}
 
-		$input['ignore_man_tag'] = ( isset( $input['ignore_man_tag'] ) && ( (bool)$input['ignore_man_tag'] === true ) ) ? true : false;
-
 		$input['units'] = ( (int)$input['units'] == 1 ) ? 1 : ( ( (int)$input['units'] == 2 ) ? 2 : 3 );
 
 		if($input['units'] == 3 && $input['quantity'] > 100) {
@@ -63,3 +61,5 @@ class AutoMoreTag_Options {
 	}
 
 }
+
+new AutoMoreTag_Options();
