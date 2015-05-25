@@ -92,6 +92,10 @@ function hasWarnings($messages) {
 					<option value="0" <?php echo (!isset($options['auto_update']) || ( (bool)$options['auto_update'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
 				</select>
 			</div>
+			<div>
+				<label for="tw_auto_more_tag[custom_content]">Custom More Tag Content:</label>
+				<input id="tw_auto_more_tag[custom_content]" name="tw_auto_more_tag[custom_content]" value="<?php echo isset( $options['custom_content'] ) ? $options['custom_content'] : null; ?>" />
+			</div>
 			<p class="submit">
 				<input type="submit" class="button-primary" value="<?php _e('Update Auto More Tag Settings'); ?>" />
 			</p>

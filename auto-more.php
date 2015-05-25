@@ -37,7 +37,7 @@ class AutoMoreTag {
 
 		$data = $this->insertTag( $data, $options['quantity'], $options['units'], $break );
 
-		return get_the_content();
+		return get_the_content( empty( $options['custom_content'] ) ? null : $options['custom_content'] );
 
 	}
 
