@@ -7,7 +7,7 @@
   
 **Tested up to:** 4.2
   
-**Stable tag:** 4.0.0
+**Stable tag:** 4.1.1
   
 
 Allows you to add a More tag to your post automatically upon publication.
