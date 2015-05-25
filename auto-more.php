@@ -6,273 +6,126 @@
   Description: Automatically add a More tag to your posts upon publication. No longer are you required to spend your time figuring out the perfect position for the more tag, you can now set a rule and this plugin will--to the best of it's abilities--add a proper more tag at or at the nearest non-destructive location.
   Author: Travis Weston, Tobias Vogel
   Author URI: https://github.com/anubisthejackle
-  Version: 4.0.0
+  Version: 4.1.0
  */
+require_once( dirname( __FILE__ ) . '/options.php' );
+class AutoMoreTag {
 
-if (!defined('TW_AUTO_MORE_TAG')) {
+	public function __construct() {
 
-	class tw_auto_more_tag {
+		add_filter(    'the_content' , array( $this, 'addTag'          ), '-1', 2);
 
-		private static $_instance;
-		public $length;
-		public $options;
-		public $data;
+		add_shortcode( 'amt_override', '__return_null'                           );
 
-		public function __construct() {
-			global $wpdb;
-			$this->_db = &$wpdb;
-			self::$_instance = $this;
-		}
+	}
 
-		private static function doLog($message) {
-			file_put_contents('./debug.log', $message, FILE_APPEND);
-		}
+	public function addTag() {
 
-		public static function addTag($data, $arr = array()) {
-			global $post, $pages, $page;
+		$options = get_option('tw_auto_more_tag');
 
-			if( $page > count( $pages ) )
-				$page = count( $pages );
+		$data = &$this->getPage();
+		$data = str_replace('<!--more-->', '', $data );
+		
+		$break = $this->getBreakPoint( $options['break'] );
 
-			$data = $pages[ $page - 1 ];
+		if( mb_strpos( $data, '[amt_override]' ) !== false ){
 
-			$options = get_option('tw_auto_more_tag');
-
-			if ($post->post_type != 'post' && $options['set_pages'] != true) {
-				$data = str_replace('<!--more-->', '', $data);
-				return $data;
-			}
-			$length = $options['quantity'];
-			$breakOn = $options['break'];
-
-			$moreTag = mb_strpos($data, '[amt_override]');
-
-			if ($moreTag !== false && $options['ignore_man_tag'] != true) {
-
-				return self::$_instance->manual($data);
-			}
-
-			if (mb_strlen(strip_tags($data)) <= 0)
-				return $data;
-
-			switch ($options['units']) {
-				case 1:
-					$data = self::$_instance->byCharacter($data, $length, $breakOn);
-					break;
-
-				case 2:
-				default:
-					$data = self::$_instance->byWord($data, $length, $breakOn);
-					break;
-
-				case 3:
-					$data = self::$_instance->byPercent($data, $length, $breakOn);
-					break;
-			}
-
-			$pages[ $page - 1 ] = $data;
+			$data = str_replace('[amt_override]', '<!--more-->', $data);
 			return get_the_content();
 
 		}
 
-		public function manual($data) {
+		$data = $this->insertTag( $data, $options['quantity'], $options['units'], $break );
 
-			$data = str_replace('<!--more-->', '', $data);
-			$data = str_replace('[amt_override]', '[amt_override]<!--more-->', $data);
+		return get_the_content( empty( $options['custom_content'] ) ? null : $options['custom_content'] );
 
-			return $data;
-		}
+	}
 
-		public function byWord($data, $length, $breakOn) {
+	private function &getPage() {
+		global $post, $pages, $page;
 
-			$break = ($breakOn == 2) ? PHP_EOL : ' ';
-			$data = str_replace('<!--more-->', '', $data);
-			$stripped_data = strip_tags($data);
+		if( $page > count( $pages ) )
+			$page = count( $pages );
 
-			$fullLength = mb_strlen($data);
+		return $pages[ $page - 1 ];
 
-			$strippedLocation = 0;
-			$wordCount = 0;
-			$insertSpot = $fullLength;
-			for ($i = 0; $i < $fullLength; $i++) {
-				if (mb_substr($stripped_data, $strippedLocation, 1) != mb_substr($data, $i, 1)) {
-					continue;
-				}
+	}
 
-				if ($wordCount >= $length) {
-					if (mb_substr($stripped_data, $strippedLocation, 1) == $break) {
-						$insertSpot = $i;
-						break;
-					}
-				}
+	private function getBreakPoint( $breakOn ) {
 
-				if (mb_substr($stripped_data, $strippedLocation, 1) == ' ') {
-					$wordCount++;
-				}
-
-				$strippedLocation++;
-			}
-
-			$start = mb_substr($data, 0, $insertSpot);
-			$end = mb_substr($data, $insertSpot);
-
-			if (mb_strlen(trim($start)) > 0 && mb_strlen(trim($end)) > 0)
-				$data = $start . '<!--more-->' . $end;
-
-			return $data;
-		}
-
-		public function byCharacter($data, $length, $breakOn) {
-
-			$break = ($breakOn == 2) ? PHP_EOL : ' ';
-			$data = str_replace('<!--more-->', '', $data);
-			$stripped_data = strip_tags($data);
-
-			$fullLength = mb_strlen($data);
-
-			$strippedLocation = 0;
-
-			$insertSpot = $fullLength;
-			for ($i = 0; $i < $fullLength; $i++) {
-				if (mb_substr($stripped_data, $strippedLocation, 1) != mb_substr($data, $i, 1)) {
-					continue;
-				}
-
-				if ($strippedLocation >= $length) {
-					if (mb_substr($stripped_data, $strippedLocation, 1) == $break) {
-						$insertSpot = $i;
-						break;
-					}
-				}
-
-				$strippedLocation++;
-			}
-
-			$start = mb_substr($data, 0, $insertSpot);
-			$end = mb_substr($data, $insertSpot);
-
-			if (mb_strlen(trim($start)) > 0 && mb_strlen(trim($end)) > 0)
-				$data = $start . '<!--more-->' . $end;
-
-			return $data;
-		}
-
-		public function byPercent($data, $length, $breakOn) {
-
-			$debug = null;
-			$break = ($breakOn === 2) ? PHP_EOL : ' ';
-			$data = str_replace('<!--more-->', '', $data);
-			/* Strip Tags, get length */
-			$stripped_data = strip_tags($data);
-			$lengthOfPost = mb_strlen($stripped_data);
-			$fullLength = mb_strlen($data);
-
-			/* Find location to insert */
-			$insert_location = $lengthOfPost * ($length / 100);
-
-			/* iterate through post, look for differences between stripped and unstripped. If found, continue */
-			$strippedLocation = 0;
-
-			$insertSpot = $fullLength;
-			for ($i = 0; $i < $fullLength; $i++) {
-				if (mb_substr($stripped_data, $strippedLocation, 1) != mb_substr($data, $i, 1)) {
-					continue;
-				}
-
-				if ($strippedLocation >= $insert_location) {
-					if (mb_substr($stripped_data, $strippedLocation, 1) == $break) {
-						$insertSpot = $i;
-						break;
-					}
-				}
-
-				$strippedLocation++;
-			}
-
-			$start = mb_substr($data, 0, $insertSpot);
-			$end = mb_substr($data, $insertSpot);
-
-			if (mb_strlen(trim($start)) > 0 && mb_strlen(trim($end)) > 0)
-				$data = $start . '<!--more-->' . $end;
-
-			return $data;
-		}
-
-		public function initOptionsPage() {
-
-			register_setting('tw_auto_more_tag', 'tw_auto_more_tag', array($this, 'validateOptions'));
-		}
-
-		public function validateOptions($input) {
-
-
-			$start = $input;
-
-			$input['messages'] = array(
-				'errors' => array(),
-				'notices' => array(),
-				'warnings' => array()
-			);
-			$input['quantity'] = (isset($input['quantity']) && (int) $input['quantity'] > 0) ? ((int) $input['quantity']) : 0;
-
-			if ($input['quantity'] != $start['quantity']) {
-				$input['messages']['notices'][] = 'Quantity cannot be less than 0, and has been set to 0.';
-			}
-
-			$input['ignore_man_tag'] = (isset($input['ignore_man_tag']) && ((bool) $input['ignore_man_tag'] == true)) ? true : false;
-
-			$input['units'] = ((int) $input['units'] == 1) ? 1 : (((int) $input['units'] == 2) ? 2 : 3);
-
-			if ($input['units'] == 3 && $input['quantity'] > 100) {
-				$input['messages']['notices'][] = 'While using Percentage breaking, you cannot us a number larger than 100%. This field has been reset to 50%.';
-				$input['quantity'] = 50;
-			}
-
-			$input['break'] = (isset($input['break']) && (int) $input['break'] == 2) ? 2 : 1;
-
-			return $input;
-		}
-
-		public function buildOptionsPage() {
-			require_once('auto-more-options-page.php');
-		}
-
-		public function addPage() {
-
-			$this->option_page = add_options_page('Auto More Tag', 'Auto More Tag', 'manage_options', 'tw_auto_more_tag', array($this, 'buildOptionsPage'));
-		}
-
-		private function updateAll() {
-			return;
-			$posts = get_posts(array(
-				'numberposts' => '-1',
-				'post_status' => 'publish',
-				'post_type' => 'post'
-			));
-
-			if (count($posts) > 0) {
-				global $post;
-				foreach ($posts as $post) {
-					setup_postdata($post);
-					$post->post_content = self::addTag($post->post_content);
-					wp_update_post($post);
-				}
-			}
-		}
-
-		public function manualOverride($atts, $content = null, $code = null) {
-			// We just want to make this tag disappear. Let's just make it go away now...
-			return null;
+		switch( $breakOn ){
+			case 2:
+				return PHP_EOL;
+				break;
+			case 1:
+			default:
+				return ' ';
+				break;
 		}
 
 	}
 
-	$tw_auto_more_tag = new tw_auto_more_tag();
+	private function insertTag( $data, $length, $units, $break ) {
 
-	add_action('admin_init', array($tw_auto_more_tag, 'initOptionsPage'));
-	add_action('admin_menu', array($tw_auto_more_tag, 'addPage'));
-	add_filter('the_content', 'tw_auto_more_tag::addTag', '-1', 2);
-	add_shortcode('amt_override', array($tw_auto_more_tag, 'manualOverride'));
+		if( mb_strlen( strip_tags( $data ) ) <= 0 )
+			return $data;
 
-	define('TW_AUTO_MORE_TAG', true);
+		switch( $units ) {
+
+			case 3:
+				$length = ceil( mb_strlen( strip_tags( $data ) ) * ( $length / 100 ) );
+			case 1:
+				$location = $this->getInsertLocation($data, $length, $break, 'characters');
+				break;
+			case 2:
+			default:
+				$location = $this->getInsertLocation($data, $length, $break, 'words');
+				break;
+
+		}
+	
+		return $this->splitAndInsert( $data, $location );	
+
+	}
+
+	private function splitAndInsert( $data, $location ) {
+
+		$start = mb_substr( $data, 0, $location);
+		$end = mb_substr( $data, $location );
+
+		if( !empty( $location ) && mb_strlen( trim( $start ) ) > 0 && mb_strlen( trim( $end ) ) > 0 )
+			$data = $start . '<!--more-->' . $end;
+
+		return $data;
+
+	}
+
+	private function getInsertLocation( $data, $insertLocation, $break, $decider = 'words' ) {
+		
+		$words = 0;
+		$characters = 0;
+	
+		$stripped_data = strip_tags( $data );
+
+		for( $i = 0; $i < mb_strlen( $data ); $i++ ) {
+
+			if ( mb_substr( $stripped_data, $characters, 1 ) != mb_substr( $data, $i, 1 ) )
+				continue;
+
+			if (mb_substr($stripped_data, $characters, 1) == ' ')	
+				$words++;
+			
+			$characters++;
+
+			if( ${$decider} < ( $insertLocation + 1 ) || ( mb_substr( $stripped_data, ( $characters - 1 ), 1 ) != $break ) )
+				continue;
+			
+			return $i;
+
+		}
+
+	}
+
 }
+
+new AutoMoreTag();

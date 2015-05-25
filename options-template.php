@@ -13,12 +13,7 @@ function hasWarnings($messages) {
 ?>
 <div class="wrap">
 	<h2>Auto More Tag by <a href="http://travisweston.com/">Travis Weston</a></h2>
-		<?php $options = get_option('tw_auto_more_tag'); 
-			if(isset($_GET['settings-updated']) && isset($options['auto_update']) && $options['auto_update'] == true){
-				$this->updateAll();
-			}
-		?>
-		<?php
+		<?php $options = get_option('tw_auto_more_tag');
 			if(hasErrors($options['messages']) || hasNotices($options['messages']) || hasWarnings($options['messages'])){
 		?>
 	<div id="auto_more_tags" class="error settings-error">
@@ -93,23 +88,13 @@ function hasWarnings($messages) {
 			<div>
 				<label for="tw_auto_more_tag[auto_update]">Auto Update Posts On Settings Update?</label>
 				<select id="tw_auto_more_tag[auto_update]" name="tw_auto_more_tag[auto_update]">
-					<option value="1" <?php echo (isset($options['auto_update']) && $options['auto_update'] == true) ? 'selected="SELECTED" ' : null;?>/>Yes
-					<option value="0" <?php echo (!isset($options['auto_update']) || $options['auto_update'] == false) ? 'selected="SELECTED" ' : null;?>/>No
+					<option value="1" <?php echo (isset($options['auto_update']) && ( (bool)$options['auto_update'] === true ) ) ? 'selected="SELECTED" ' : null;?>/>Yes
+					<option value="0" <?php echo (!isset($options['auto_update']) || ( (bool)$options['auto_update'] === false ) ) ? 'selected="SELECTED" ' : null;?>/>No
 				</select>
 			</div>
 			<div>
-				<label for="tw_auto_more_tag[ignore_man_tag]">Ignore Manually Inserted Tags?</label>
-				<select id="tw_auto_more_tag[ignore_man_tag]" name="tw_auto_more_tag[ignore_man_tag]">
-					<option value="1" <?php echo (!isset($options['ignore_man_tag']) || $options['ignore_man_tag'] == true) ? 'selected="SELECTED" ' : null;?>/>Yes
-					<option value="0" <?php echo (isset($options['ignore_man_tag']) && $options['ignore_man_tag'] == false) ? 'selected="SELECTED" ' : null;?>/>No
-				</select>
-			</div>
-			<div>
-				<label for="tw_auto_more_tag[set_pages]">Set More Tag On Pages?</label>
-				<select id="tw_auto_more_tag[set_pages]" name="tw_auto_more_tag[set_pages]">
-					<option value="0" <?php echo (!isset($options['set_pages']) || $options['set_pages'] == false) ? 'selected="SELECTED" ' : null;?>/>No
-					<option value="1" <?php echo (isset($options['set_pages']) && $options['set_pages'] == true) ? 'selected="SELECTED" ' : null;?>/>Yes
-				</select>
+				<label for="tw_auto_more_tag[custom_content]">Custom More Tag Content:</label>
+				<input id="tw_auto_more_tag[custom_content]" name="tw_auto_more_tag[custom_content]" value="<?php echo isset( $options['custom_content'] ) ? $options['custom_content'] : null; ?>" />
 			</div>
 			<p class="submit">
 				<input type="submit" class="button-primary" value="<?php _e('Update Auto More Tag Settings'); ?>" />
